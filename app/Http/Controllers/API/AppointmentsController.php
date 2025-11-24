@@ -11,7 +11,7 @@ use Exception;
 
 class AppointmentsController extends Controller
 {
-    // --- GET USER APPOINTMENTS ---
+    // ... existing index function ...
     public function index(Request $request)
     {
         try {
@@ -34,7 +34,7 @@ class AppointmentsController extends Controller
         }
     }
 
-    // --- CREATE NEW APPOINTMENT ---
+    // --- UPDATED STORE FUNCTION ---
     public function store(Request $request)
     {
         try {
@@ -85,7 +85,7 @@ class AppointmentsController extends Controller
         }
     }
 
-    // --- SHOW SINGLE APPOINTMENT ---
+    // ... existing show and getAvailability functions ...
     public function show($id)
     {
         try {
@@ -97,69 +97,6 @@ class AppointmentsController extends Controller
         }
     }
 
-    // --- UPDATE APPOINTMENT (THIS WAS MISSING) ---
-    public function update(Request $request, $id)
-    {
-        try {
-            // 1. Find the appointment
-            $appointment = Appointment::find($id);
-
-            if (!$appointment) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Appointment not found'
-                ], 404);
-            }
-
-            // 2. Validate incoming data
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string',
-                'age' => 'required',
-                'sex' => 'required|string',
-                'animal_type' => 'required|string',
-                'date' => 'required',
-                'time' => 'required',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            // 3. Check for Double Booking (Exclude self)
-            // We check if another appointment exists at this time, NOT including this one
-            $exists = Appointment::where('date', $request->date)
-                ->where('time', $request->time)
-                ->where('id', '!=', $id) // Important: Don't block if updating self without changing time
-                ->exists();
-
-            if ($exists) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'This slot is already booked by another patient.'
-                ], 409);
-            }
-
-            // 4. Update the record
-            $appointment->update($validator->validated());
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Appointment updated successfully',
-                'data' => $appointment
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    // --- GET AVAILABILITY FOR CALENDAR ---
     public function getAvailability()
     {
         try {
@@ -173,7 +110,7 @@ class AppointmentsController extends Controller
         }
     }
 
-    // --- CANCEL APPOINTMENT ---
+
     public function destroy($id)
     {
         try {
@@ -194,3 +131,4 @@ class AppointmentsController extends Controller
         }
     }
 }
+
