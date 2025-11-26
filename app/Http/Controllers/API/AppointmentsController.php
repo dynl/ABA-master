@@ -11,7 +11,7 @@ use Exception;
 
 class AppointmentsController extends Controller
 {
-    // ... existing index function ...
+    // --- GET USER APPOINTMENTS ---
     public function index(Request $request)
     {
         try {
@@ -34,7 +34,7 @@ class AppointmentsController extends Controller
         }
     }
 
-    // --- UPDATED STORE FUNCTION ---
+    // --- CREATE NEW APPOINTMENT (FIXED) ---
     public function store(Request $request)
     {
         try {
@@ -55,7 +55,10 @@ class AppointmentsController extends Controller
                 ], 422);
             }
 
-            // 1. CHECK FOR DOUBLE BOOKING
+            // --- REMOVED DOUBLE BOOKING CHECK ---
+            // We commented this out because we want multiple people to be able
+            // to book the same day/time (since time is now just "Walk-In")
+            /*
             $exists = Appointment::where('date', $request->date)
                 ->where('time', $request->time)
                 ->exists();
@@ -64,8 +67,9 @@ class AppointmentsController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'This date and time slot is already booked. Please choose another.'
-                ], 409); // 409 = Conflict
+                ], 409); 
             }
+            */
 
             // 2. Create Appointment
             $data = $validator->validated();
@@ -85,7 +89,7 @@ class AppointmentsController extends Controller
         }
     }
 
-    // ... existing show and getAvailability functions ...
+    // --- SHOW SINGLE APPOINTMENT ---
     public function show($id)
     {
         try {
@@ -97,6 +101,48 @@ class AppointmentsController extends Controller
         }
     }
 
+    // --- UPDATE APPOINTMENT (Restored) ---
+    public function update(Request $request, $id)
+    {
+        try {
+            $appointment = Appointment::find($id);
+
+            if (!$appointment) {
+                return response()->json(['success' => false, 'message' => 'Appointment not found'], 404);
+            }
+
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string',
+                'age' => 'required',
+                'sex' => 'required|string',
+                'animal_type' => 'required|string',
+                'date' => 'required',
+                'time' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Note: We also removed the double-booking check here for edits
+
+            $appointment->update($validator->validated());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Appointment updated successfully',
+                'data' => $appointment
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    // --- GET AVAILABILITY ---
     public function getAvailability()
     {
         try {
@@ -110,7 +156,7 @@ class AppointmentsController extends Controller
         }
     }
 
-
+    // --- DELETE APPOINTMENT ---
     public function destroy($id)
     {
         try {
@@ -131,4 +177,3 @@ class AppointmentsController extends Controller
         }
     }
 }
-

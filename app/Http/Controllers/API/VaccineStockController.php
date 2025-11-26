@@ -12,6 +12,7 @@ class VaccineStockController extends Controller
     // Update or Create stock for a specific day
     public function store(Request $request)
     {
+        // 1. Validate
         $validator = Validator::make($request->all(), [
             'date' => 'required|date',
             'amount' => 'required|integer|min:0',
@@ -21,7 +22,7 @@ class VaccineStockController extends Controller
             return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
-        // updateOrCreate checks if 'date' exists. If yes, updates 'quantity'. If no, creates new.
+        // 2. Save (Update if exists, Create if new)
         $stock = VaccineStock::updateOrCreate(
             ['date' => $request->date],
             ['quantity' => $request->amount]
@@ -37,11 +38,7 @@ class VaccineStockController extends Controller
     // Get stock list
     public function index()
     {
-        // FIX: Removed ->whereDate('date', '>=', now()) to solve timezone issues
-        $stocks = VaccineStock::orderBy('date', 'desc')
-            ->take(50) // Just take the last 50 entries
-            ->get();
-
+        $stocks = VaccineStock::orderBy('date', 'asc')->get();
         return response()->json(['success' => true, 'data' => $stocks]);
     }
 }

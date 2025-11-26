@@ -9,5 +9,6 @@ class VaccineStock extends Model
 {
     use HasFactory;
 
+    // ERROR FIX: You MUST have this line to save data
     protected $fillable = ['date', 'quantity'];
 }

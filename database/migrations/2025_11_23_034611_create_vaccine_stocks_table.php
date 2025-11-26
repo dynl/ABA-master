@@ -13,8 +13,8 @@ public function up()
 {
     Schema::create('vaccine_stocks', function (Blueprint $table) {
         $table->id();
-        $table->date('date')->unique(); // One record per day
-        $table->integer('quantity');    // How many doses available
+        $table->date('date')->unique(); // Ensures one record per day
+        $table->integer('quantity');    // The stock amount
         $table->timestamps();
     });
 }
